@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { sourceFiles, fileCategories } from '../data/sourceFiles';
-import { Copy, Check, ChevronRight, Folder, FileCode } from 'lucide-react';
+import { Copy, Check, ChevronRight, Folder, FileCode, Download } from 'lucide-react';
+import { downloadSingleFile } from '../utils/downloadZip';
 
 export function SourceCodePage() {
   const [selectedFile, setSelectedFile] = useState(sourceFiles[0]);
@@ -89,18 +90,36 @@ export function SourceCodePage() {
             </div>
             <div className="max-h-[70vh] overflow-y-auto">
               {filteredFiles.map((file, i) => (
-                <button
+                <div
                   key={i}
-                  onClick={() => setSelectedFile(file)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-all border-b border-gray-800/30 ${
+                  className={`flex items-center gap-1 px-2 py-1.5 border-b border-gray-800/30 group ${
                     selectedFile.path === file.path
-                      ? 'bg-emerald-900/20 text-emerald-300'
-                      : 'text-gray-400 hover:bg-gray-800/30 hover:text-gray-200'
+                      ? 'bg-emerald-900/20'
+                      : 'hover:bg-gray-800/30'
                   }`}
                 >
-                  <FileCode className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="font-mono text-xs truncate">{file.path}</span>
-                </button>
+                  <button
+                    onClick={() => setSelectedFile(file)}
+                    className={`flex-1 flex items-center gap-2 text-left text-sm transition-all ${
+                      selectedFile.path === file.path
+                        ? 'text-emerald-300'
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    <FileCode className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="font-mono text-xs truncate">{file.path}</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadSingleFile(file);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-700 transition-all"
+                    title="Download file ini"
+                  >
+                    <Download className="w-3 h-3 text-gray-400" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -118,13 +137,23 @@ export function SourceCodePage() {
                   {selectedFile.language}
                 </span>
               </div>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => downloadSingleFile(selectedFile)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-emerald-100 text-xs transition-colors"
+                  title="Download file ini"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
             </div>
 
             {/* Description */}

@@ -1,5 +1,6 @@
 import type { Page } from '../App';
-import { Database, Shield, Server, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Database, Shield, Server, AlertTriangle, CheckCircle, Download } from 'lucide-react';
+import { DownloadButton } from '../components/DownloadButton';
 
 interface Props {
   onNavigate: (page: Page) => void;
@@ -47,6 +48,10 @@ export function Phase3Overview({ onNavigate }: Props) {
           <p className="text-gray-400 text-lg max-w-2xl">
             Three hands-on labs demonstrating real-world web vulnerabilities with vulnerable and secure implementations.
           </p>
+          <div className="mt-4 flex items-center gap-3">
+            <DownloadButton variant="primary" size="md" />
+            <span className="text-xs text-gray-500">Download seluruh source code Phase 2 & 3 sebagai file ZIP</span>
+          </div>
           <div className="mt-4 p-3 rounded-lg bg-red-900/20 border border-red-800/30">
             <p className="text-sm text-red-200 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />

@@ -9,6 +9,7 @@ import { LabSessionPage } from './pages/LabSessionPage';
 import { ComparisonPage } from './pages/ComparisonPage';
 import { DocumentationPage } from './pages/DocumentationPage';
 import { ValidationChecklist } from './pages/ValidationChecklist';
+import { DownloadButton } from './components/DownloadButton';
 
 export type Page = 'overview' | 'source' | 'sqli' | 'cookies' | 'session' | 'comparison' | 'docs' | 'validation';
 
@@ -41,6 +42,15 @@ export default function App() {
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
         <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+          {/* Top bar with download button */}
+          <div className="border-b border-gray-800 bg-gray-900/50 px-6 py-3 flex items-center justify-between">
+            <div className="text-sm text-gray-400">
+              <span className="text-emerald-400 font-semibold">Web Security Lab</span>
+              <span className="mx-2">•</span>
+              <span>Phase 2 & 3</span>
+            </div>
+            <DownloadButton variant="primary" size="sm" />
+          </div>
           <div className="p-6 lg:p-8 max-w-7xl mx-auto">
             {renderPage()}
           </div>
