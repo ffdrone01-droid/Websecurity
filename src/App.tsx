@@ -1,30 +1,26 @@
 import { useState } from 'react';
 import { SecurityBanner } from './components/SecurityBanner';
-import { Sidebar } from './components/Sidebar';
-import { HomePage } from './pages/HomePage';
-import { ArchitecturePage } from './pages/ArchitecturePage';
-import { DatabaseSchemaPage } from './pages/DatabaseSchemaPage';
-import { RouteMapPage } from './pages/RouteMapPage';
-import { DataFlowPage } from './pages/DataFlowPage';
-import { ProjectStructurePage } from './pages/ProjectStructurePage';
-import { TechStackPage } from './pages/TechStackPage';
+import { Phase2Sidebar } from './components/Phase2Sidebar';
+import { Phase2Overview } from './pages/Phase2Overview';
+import { SourceCodePage } from './pages/SourceCodePage';
+import { DocumentationPage } from './pages/DocumentationPage';
+import { InteractiveDemo } from './pages/InteractiveDemo';
+import { ValidationChecklist } from './pages/ValidationChecklist';
 
-type Page = 'home' | 'architecture' | 'database' | 'routes' | 'dataflow' | 'structure' | 'techstack';
+export type Page = 'overview' | 'source' | 'docs' | 'demo' | 'validation';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [currentPage, setCurrentPage] = useState<Page>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home': return <HomePage onNavigate={setCurrentPage} />;
-      case 'architecture': return <ArchitecturePage />;
-      case 'database': return <DatabaseSchemaPage />;
-      case 'routes': return <RouteMapPage />;
-      case 'dataflow': return <DataFlowPage />;
-      case 'structure': return <ProjectStructurePage />;
-      case 'techstack': return <TechStackPage />;
-      default: return <HomePage onNavigate={setCurrentPage} />;
+      case 'overview': return <Phase2Overview onNavigate={setCurrentPage} />;
+      case 'source': return <SourceCodePage />;
+      case 'docs': return <DocumentationPage />;
+      case 'demo': return <InteractiveDemo />;
+      case 'validation': return <ValidationChecklist />;
+      default: return <Phase2Overview onNavigate={setCurrentPage} />;
     }
   };
 
@@ -32,7 +28,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
       <SecurityBanner />
       <div className="flex flex-1">
-        <Sidebar
+        <Phase2Sidebar
           currentPage={currentPage}
           onNavigate={setCurrentPage}
           isOpen={sidebarOpen}

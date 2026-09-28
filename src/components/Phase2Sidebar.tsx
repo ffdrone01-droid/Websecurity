@@ -1,17 +1,5 @@
-import {
-  Home,
-  Network,
-  Database,
-  Route,
-  GitBranch,
-  FolderTree,
-  Layers,
-  ChevronLeft,
-  ChevronRight,
-  Shield,
-} from 'lucide-react';
-
-type Page = 'home' | 'architecture' | 'database' | 'routes' | 'dataflow' | 'structure' | 'techstack';
+import { Home, Code2, FileText, PlayCircle, CheckSquare, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import type { Page } from '../App';
 
 interface SidebarProps {
   currentPage: Page;
@@ -21,16 +9,14 @@ interface SidebarProps {
 }
 
 const navItems: { id: Page; label: string; icon: React.ReactNode; section?: string }[] = [
-  { id: 'home', label: 'Overview', icon: <Home className="w-4 h-4" />, section: 'PHASE 1' },
-  { id: 'architecture', label: 'Architecture', icon: <Network className="w-4 h-4" /> },
-  { id: 'structure', label: 'Project Structure', icon: <FolderTree className="w-4 h-4" /> },
-  { id: 'database', label: 'Database Schema', icon: <Database className="w-4 h-4" />, section: 'DATA LAYER' },
-  { id: 'routes', label: 'Route Map', icon: <Route className="w-4 h-4" /> },
-  { id: 'dataflow', label: 'Data Flow', icon: <GitBranch className="w-4 h-4" /> },
-  { id: 'techstack', label: 'Technology Stack', icon: <Layers className="w-4 h-4" />, section: 'TECHNOLOGY' },
+  { id: 'overview', label: 'Phase 2 Overview', icon: <Home className="w-4 h-4" />, section: 'CORE APP' },
+  { id: 'source', label: 'Source Code', icon: <Code2 className="w-4 h-4" /> },
+  { id: 'docs', label: 'Documentation', icon: <FileText className="w-4 h-4" />, section: 'DOCUMENTATION' },
+  { id: 'demo', label: 'Interactive Demo', icon: <PlayCircle className="w-4 h-4" />, section: 'DEMO' },
+  { id: 'validation', label: 'Validation Checklist', icon: <CheckSquare className="w-4 h-4" /> },
 ];
 
-export function Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarProps) {
+export function Phase2Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarProps) {
   return (
     <aside
       className={`fixed left-0 top-0 h-full bg-gray-900 border-r border-gray-800 transition-all duration-300 z-40 flex flex-col ${
@@ -38,18 +24,16 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarPr
       }`}
       style={{ paddingTop: '48px' }}
     >
-      {/* Logo */}
       <div className="p-4 border-b border-gray-800 flex items-center gap-3">
         <Shield className="w-6 h-6 text-emerald-400 flex-shrink-0" />
         {isOpen && (
           <div className="overflow-hidden">
             <h1 className="text-sm font-bold text-emerald-400 whitespace-nowrap">Web Security Lab</h1>
-            <p className="text-[10px] text-gray-500 whitespace-nowrap">Phase 1 — Architecture</p>
+            <p className="text-[10px] text-gray-500 whitespace-nowrap">Phase 2 — Core Foundation</p>
           </div>
         )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 py-4 overflow-y-auto">
         {navItems.map((item) => (
           <div key={item.id}>
@@ -76,7 +60,6 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarPr
         ))}
       </nav>
 
-      {/* Toggle */}
       <div className="p-3 border-t border-gray-800">
         <button
           onClick={onToggle}
