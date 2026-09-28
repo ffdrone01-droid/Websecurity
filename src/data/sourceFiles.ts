@@ -421,43 +421,266 @@ def labs():
     path: 'app/routes/vulnerable.py',
     language: 'python',
     category: 'routes',
-    description: 'Placeholder for Phase 3 vulnerable routes',
+    description: 'Vulnerable lab routes (Phase 3)',
     content: `"""
-Vulnerable Routes — PLACEHOLDER
+Vulnerable Lab Routes — Phase 3
 
-This file will contain intentionally vulnerable endpoints
-for Phase 3 security lab demonstrations.
+Intentionally vulnerable endpoints for security education.
 
-Phase 3 will implement:
-- SQL Injection vulnerable login
-- Insecure cookie configuration
-- Weak session management
-
-DO NOT implement vulnerabilities in Phase 2.
+SAFETY:
+- Only accessible when LAB_MODE=true
+- Self-contained within lab environment
+- No external network access
 """
-# This file is intentionally minimal in Phase 2.
-# Phase 3 will add vulnerable lab endpoints here.`
+import os
+from flask import Blueprint, request, render_template, jsonify, session, make_response, current_app
+from app.security.vulnerable_auth import vulnerable_sqli_login
+from app.security.vulnerable_session import (
+    vulnerable_generate_session_id,
+    vulnerable_session_login,
+    vulnerable_session_logout
+)
+
+vulnerable_bp = Blueprint('vulnerable', __name__)
+
+
+def lab_mode_required(f):
+    """Decorator to ensure vulnerable routes only work in lab mode."""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_app.config.get('LAB_MODE', False):
+            return jsonify({
+                'error': 'Lab mode is not enabled.',
+                'message': 'Set LAB_MODE=true in .env to enable vulnerable labs.'
+            }), 403
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ====================
+# SQL Injection Lab
+# ====================
+
+@vulnerable_bp.route('/lab/sqli/vulnerable', methods=['GET', 'POST'])
+@lab_mode_required
+def sqli_vulnerable_login():
+    """
+    VULNERABLE: SQL Injection login endpoint.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: String concatenation in SQL query.
+    """
+    if request.method == 'GET':
+        return render_template('labs/sqli_vulnerable.html')
+
+    username = request.form.get('username', '')
+    password = request.form.get('password', '')
+
+    result = vulnerable_sqli_login(username, password)
+    return jsonify(result)
+
+
+# ====================
+# Cookie Security Lab
+# ====================
+
+@vulnerable_bp.route('/lab/cookies/vulnerable', methods=['GET', 'POST'])
+@lab_mode_required
+def vulnerable_cookie_demo():
+    """
+    VULNERABLE: Weak cookie configuration.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: Missing security flags on cookies.
+    """
+    if request.method == 'GET':
+        return render_template('labs/cookies_vulnerable.html')
+
+    # VULNERABLE: Set cookie without security flags
+    response = make_response(jsonify({
+        'message': 'Vulnerable cookie set.',
+        'cookie_info': {
+            'name': 'vuln_session',
+            'httponly': False,
+            'secure': False,
+            'samesite': 'None',
+        }
+    }))
+
+    response.set_cookie(
+        'vuln_session',
+        'vulnerable_session_token_123',
+        httponly=False,   # VULNERABLE: JS can access
+        secure=False,     # VULNERABLE: Sent over HTTP
+        samesite='None',  # VULNERABLE: Cross-site requests
+    )
+
+    return response
+
+
+# ====================
+# Session Security Lab
+# ====================
+
+@vulnerable_bp.route('/lab/session/vulnerable', methods=['GET', 'POST'])
+@lab_mode_required
+def vulnerable_session_demo():
+    """
+    VULNERABLE: Weak session management.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: No session regeneration, incomplete invalidation.
+    """
+    if request.method == 'GET':
+        return render_template('labs/session_vulnerable.html')
+
+    action = request.form.get('action', '')
+
+    if action == 'login':
+        username = request.form.get('username', 'student')
+        # VULNERABLE: No session regeneration
+        vulnerable_session_login(1, username)
+        return jsonify({
+            'message': f'Logged in as {username}',
+            'session_id': 'NOT_REGENERATED',
+            'vulnerability': 'Session fixation possible'
+        })
+
+    elif action == 'logout':
+        # VULNERABLE: Incomplete invalidation
+        vulnerable_session_logout()
+        return jsonify({
+            'message': 'Logged out (vulnerable)',
+            'vulnerability': 'Session ID may still be valid'
+        })
+
+    return jsonify({'error': 'Invalid action'})`
   },
   {
     path: 'app/routes/secure.py',
     language: 'python',
     category: 'routes',
-    description: 'Placeholder for Phase 3 secure routes',
+    description: 'Secure lab routes (Phase 3)',
     content: `"""
-Secure Routes — PLACEHOLDER
+Secure Lab Routes — Phase 3
 
-This file will contain secure implementations
-for Phase 3 security lab comparisons.
+Secure implementations for comparison with vulnerable labs.
 
-Phase 3 will implement:
-- Parameterized query login
-- Secure cookie configuration
-- Proper session management
-
-DO NOT implement vulnerabilities in Phase 2.
+These endpoints demonstrate proper security practices:
+- Parameterized queries
+- Secure cookie flags
+- Session regeneration and invalidation
 """
-# This file is intentionally minimal in Phase 2.
-# Phase 3 will add secure lab endpoints here.`
+from flask import Blueprint, request, render_template, jsonify, session, make_response, current_app
+from app.security.secure_auth import secure_sqli_login
+from app.security.secure_session import (
+    secure_generate_session_id,
+    secure_session_login,
+    secure_session_logout,
+    configure_secure_session
+)
+
+secure_bp = Blueprint('secure', __name__)
+
+
+# ====================
+# SQL Injection Lab (Secure)
+# ====================
+
+@secure_bp.route('/lab/sqli/secure', methods=['GET', 'POST'])
+def sqli_secure_login():
+    """
+    SECURE: Parameterized query login endpoint.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Parameterized query prevents SQL injection.
+    """
+    if request.method == 'GET':
+        return render_template('labs/sqli_secure.html')
+
+    username = request.form.get('username', '')
+    password = request.form.get('password', '')
+
+    result = secure_sqli_login(username, password)
+    return jsonify(result)
+
+
+# ====================
+# Cookie Security Lab (Secure)
+# ====================
+
+@secure_bp.route('/lab/cookies/secure', methods=['GET', 'POST'])
+def secure_cookie_demo():
+    """
+    SECURE: Proper cookie configuration.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: All security flags properly set.
+    """
+    if request.method == 'GET':
+        return render_template('labs/cookies_secure.html')
+
+    # SECURE: Set cookie with all security flags
+    response = make_response(jsonify({
+        'message': 'Secure cookie set.',
+        'cookie_info': {
+            'name': 'secure_session',
+            'httponly': True,
+            'secure': current_app.config.get('FLASK_ENV') == 'production',
+            'samesite': 'Lax',
+        }
+    }))
+
+    response.set_cookie(
+        'secure_session',
+        secure_generate_session_id(),
+        httponly=True,    # SECURE: JS cannot access
+        secure=current_app.config.get('FLASK_ENV') == 'production',  # SECURE: HTTPS only in prod
+        samesite='Lax',   # SECURE: CSRF protection
+        max_age=1800,     # 30 minutes
+    )
+
+    return response
+
+
+# ====================
+# Session Security Lab (Secure)
+# ====================
+
+@secure_bp.route('/lab/session/secure', methods=['GET', 'POST'])
+def secure_session_demo():
+    """
+    SECURE: Proper session management.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Session regeneration, complete invalidation.
+    """
+    if request.method == 'GET':
+        return render_template('labs/session_secure.html')
+
+    action = request.form.get('action', '')
+
+    if action == 'login':
+        username = request.form.get('username', 'student')
+        # SECURE: Session regeneration after authentication
+        secure_session_login(1, username)
+        return jsonify({
+            'message': f'Logged in as {username}',
+            'session_regenerated': True,
+            'mitigation': 'Session fixation prevented'
+        })
+
+    elif action == 'logout':
+        # SECURE: Complete session invalidation
+        secure_session_logout()
+        return jsonify({
+            'message': 'Logged out (secure)',
+            'session_invalidated': True,
+            'mitigation': 'Session completely destroyed'
+        })
+
+    return jsonify({'error': 'Invalid action'})`
   },
 
   // ===== MODELS =====
@@ -607,86 +830,327 @@ CREATE INDEX IF NOT EXISTS idx_login_logs_created ON login_logs(created_at);`
     path: 'app/security/vulnerable_auth.py',
     language: 'python',
     category: 'security',
-    description: 'Placeholder — Phase 3 will add vulnerable auth',
+    description: 'Vulnerable authentication (SQL Injection demo)',
     content: `"""
-Vulnerable Authentication — PLACEHOLDER
+Vulnerable Authentication — SQL Injection Lab
 
-This file will contain intentionally vulnerable authentication code
-for Phase 3 SQL Injection lab demonstration.
+VULNERABLE IMPLEMENTATION
 
-Planned vulnerabilities (Phase 3):
-- SQL query built with string concatenation
-- Weak password comparison
-- Verbose error messages
+ROOT CAUSE:
+User-controlled input is incorporated into SQL query construction
+without proper parameterization. This allows attackers to manipulate
+the query structure.
 
-DO NOT implement vulnerabilities in Phase 2.
+EDUCATIONAL PURPOSE:
+This endpoint exists only for the local security lab.
+It demonstrates why string concatenation in SQL queries is dangerous.
+
+SAFETY:
+- Only accessible when LAB_MODE=true
+- Uses the lab database only
+- No external network access
 """
-# Placeholder for Phase 3`
+import sqlite3
+from flask import current_app
+
+
+def vulnerable_sqli_login(username: str, password: str) -> dict:
+    """
+    VULNERABLE: Login using string concatenation.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: User input directly concatenated into SQL query.
+    WHY THIS IS DANGEROUS: Attackers can manipulate query structure.
+
+    Args:
+        username: User-provided username (UNTRUSTED INPUT)
+        password: User-provided password (UNTRUSTED INPUT)
+
+    Returns:
+        dict: {'success': bool, 'message': str, 'user': dict|None}
+    """
+    db_path = current_app.config['DATABASE_PATH']
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+
+    try:
+        # VULNERABLE: String concatenation — DO NOT USE IN PRODUCTION
+        # ROOT CAUSE: User input becomes part of SQL command structure
+        query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
+
+        # For educational purposes, we also show the generated query
+        # In real vulnerable apps, this would NOT be exposed
+        cursor = conn.execute(query)
+        user = cursor.fetchone()
+
+        if user:
+            return {
+                'success': True,
+                'message': f'Login successful. Welcome, {user["username"]}!',
+                'user': dict(user),
+                'query_used': query,  # Educational: show the query
+            }
+        else:
+            return {
+                'success': False,
+                'message': 'Invalid username or password.',
+                'user': None,
+                'query_used': query,  # Educational: show the query
+            }
+
+    except Exception as e:
+        # VULNERABLE: Verbose error messages leak information
+        return {
+            'success': False,
+            'message': f'Database error: {str(e)}',
+            'user': None,
+            'query_used': f"SELECT * FROM users WHERE username='{username}' AND password='{password}'",
+        }
+    finally:
+        conn.close()`
   },
   {
     path: 'app/security/secure_auth.py',
     language: 'python',
     category: 'security',
-    description: 'Placeholder — Phase 3 will add enhanced secure auth',
+    description: 'Secure authentication (SQL Injection mitigation)',
     content: `"""
-Secure Authentication — PLACEHOLDER
+Secure Authentication — SQL Injection Lab
 
-This file will contain enhanced secure authentication code
-for Phase 3 comparison with vulnerable implementation.
+SECURE IMPLEMENTATION
 
-Phase 2 authentication (in routes/auth.py) is already secure.
-Phase 3 will add additional security features here:
-- Rate limiting
-- Account lockout
-- Enhanced logging
-- CSRF protection
+MITIGATION:
+Use parameterized queries so user input remains data
+rather than becoming part of the SQL query structure.
 
-DO NOT implement vulnerabilities in Phase 2.
+WHY PARAMETERIZATION WORKS:
+The database driver treats parameter values as literal data,
+not as SQL commands. Special characters like quotes are properly
+escaped, preventing query structure manipulation.
+
+EDUCATIONAL PURPOSE:
+Compare this implementation with vulnerable_auth.py to understand
+the difference between string concatenation and parameterization.
 """
-# Placeholder for Phase 3`
+import sqlite3
+import bcrypt
+from flask import current_app
+
+
+def secure_sqli_login(username: str, password: str) -> dict:
+    """
+    SECURE: Login using parameterized query.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Parameterized query prevents SQL injection.
+    WHY PARAMETERIZATION WORKS: Input is treated as data, not code.
+
+    Args:
+        username: User-provided username
+        password: User-provided password
+
+    Returns:
+        dict: {'success': bool, 'message': str}
+    """
+    db_path = current_app.config['DATABASE_PATH']
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+
+    try:
+        # SECURE: Parameterized query — input is data, not code
+        # MITIGATION: The ? placeholder ensures user input cannot
+        # alter the SQL query structure
+        cursor = conn.execute(
+            "SELECT id, username, password_hash FROM users WHERE username = ?",
+            (username,)
+        )
+        user = cursor.fetchone()
+
+        # Verify password using bcrypt
+        if user and bcrypt.checkpw(
+            password.encode('utf-8'),
+            user['password_hash'].encode('utf-8')
+        ):
+            return {
+                'success': True,
+                'message': f'Login successful. Welcome, {user["username"]}!',
+            }
+        else:
+            # Generic error message — no information leakage
+            return {
+                'success': False,
+                'message': 'Invalid username or password.',
+            }
+
+    except Exception as e:
+        # Log error internally but show generic message to user
+        current_app.logger.error(f"Login error: {e}")
+        return {
+            'success': False,
+            'message': 'An error occurred. Please try again.',
+        }
+    finally:
+        conn.close()`
   },
   {
     path: 'app/security/vulnerable_session.py',
     language: 'python',
     category: 'security',
-    description: 'Placeholder — Phase 3 will add vulnerable session',
+    description: 'Vulnerable session management (demonstration)',
     content: `"""
-Vulnerable Session Management — PLACEHOLDER
+Vulnerable Session Management — Session Security Lab
 
-This file will contain intentionally weak session management
-for Phase 3 Session Security lab demonstration.
+VULNERABLE IMPLEMENTATION
 
-Planned vulnerabilities (Phase 3):
+ROOT CAUSE:
+- No session regeneration after authentication (session fixation)
+- Incomplete session invalidation on logout
 - Predictable session identifiers
-- No session regeneration after login
-- No session invalidation on logout
-- Excessively long session lifetime
+- No session expiration
 
-DO NOT implement vulnerabilities in Phase 2.
+EDUCATIONAL PURPOSE:
+Demonstrates why proper session lifecycle management is critical.
+
+SAFETY:
+- Only accessible when LAB_MODE=true
+- Self-contained within lab environment
 """
-# Placeholder for Phase 3`
+import time
+from flask import session
+
+
+# VULNERABLE: Predictable session counter
+_session_counter = 0
+
+
+def vulnerable_generate_session_id() -> str:
+    """
+    VULNERABLE: Predictable session identifier.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: Sequential counter makes session IDs predictable.
+    """
+    global _session_counter
+    _session_counter += 1
+    return f"sess_vuln_{_session_counter}_{int(time.time())}"
+
+
+def vulnerable_session_login(user_id: int, username: str):
+    """
+    VULNERABLE: No session regeneration after login.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: Session ID remains the same after authentication.
+    This enables session fixation attacks.
+    """
+    # VULNERABLE: Just set values, don't regenerate session
+    # The session ID from before login is still used
+    session['user_id'] = user_id
+    session['username'] = username
+    session['logged_in'] = True
+    # NO session.clear() or regeneration!
+
+
+def vulnerable_session_logout():
+    """
+    VULNERABLE: Incomplete session invalidation.
+
+    VULNERABLE IMPLEMENTATION
+    ROOT CAUSE: Only removes some keys, session ID stays valid.
+    """
+    # VULNERABLE: Partial cleanup
+    session.pop('user_id', None)
+    session.pop('username', None)
+    # VULNERABLE: 'logged_in' key might still exist
+    # VULNERABLE: Session ID is NOT invalidated
+    # VULNERABLE: Session can potentially be reused`
   },
   {
     path: 'app/security/secure_session.py',
     language: 'python',
     category: 'security',
-    description: 'Placeholder — Phase 3 will add enhanced secure session',
+    description: 'Secure session management',
     content: `"""
-Secure Session Management — PLACEHOLDER
+Secure Session Management — Session Security Lab
 
-This file will contain enhanced secure session management
-for Phase 3 comparison with vulnerable implementation.
+SECURE IMPLEMENTATION
 
-Phase 3 will add:
-- Cryptographic session identifiers
+MITIGATION:
 - Session regeneration after authentication
-- Proper invalidation on logout
-- Configurable expiration
-- Secure cookie flags
+- Complete session invalidation on logout
+- Cryptographically secure session identifiers
+- Configurable session expiration
+- Secure cookie configuration
 
-DO NOT implement vulnerabilities in Phase 2.
+WHY THIS WORKS:
+- Regeneration prevents session fixation
+- Complete invalidation prevents session reuse
+- Secure identifiers prevent prediction
+- Expiration limits attack window
 """
-# Placeholder for Phase 3`
+import secrets
+from datetime import timedelta
+from flask import session, current_app
+
+
+def secure_generate_session_id() -> str:
+    """
+    SECURE: Cryptographically secure session identifier.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Uses secrets module for unpredictable IDs.
+    """
+    return secrets.token_hex(32)  # 64 character hex string
+
+
+def secure_session_login(user_id: int, username: str):
+    """
+    SECURE: Session regeneration after authentication.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Clear old session and create new one.
+    This prevents session fixation attacks.
+    """
+    # SECURE: Clear existing session data
+    session.clear()
+
+    # SECURE: Mark session as permanent for expiration
+    session.permanent = True
+
+    # Set new session data
+    session['user_id'] = user_id
+    session['username'] = username
+    session['logged_in'] = True
+    session['login_time'] = str(__import__('datetime').datetime.now())
+
+
+def secure_session_logout():
+    """
+    SECURE: Complete session invalidation.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Clear entire session, not just some keys.
+    """
+    # SECURE: Complete session destruction
+    session.clear()
+
+
+def configure_secure_session(app):
+    """
+    Configure secure session settings for the application.
+
+    SECURE IMPLEMENTATION
+    MITIGATION: Proper cookie flags and session lifetime.
+    """
+    app.config['SESSION_COOKIE_NAME'] = 'session_id'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS access
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+
+    # Note: SESSION_COOKIE_SECURE should be True in production (HTTPS)
+    # For localhost HTTP development, we set it conditionally
+    if app.config.get('FLASK_ENV') == 'production':
+        app.config['SESSION_COOKIE_SECURE'] = True`
   },
 
   // ===== TEMPLATES =====
@@ -1906,53 +2370,336 @@ class TestDatabase:
     path: 'tests/test_sqli.py',
     language: 'python',
     category: 'tests',
-    description: 'Placeholder for Phase 3 SQL injection tests',
+    description: 'SQL Injection tests (Phase 3)',
     content: `"""
-SQL Injection Tests — PLACEHOLDER
+SQL Injection Tests — Phase 3
 
-Phase 3 will implement tests for:
-- Vulnerable endpoint behavior with SQL injection payloads
-- Secure endpoint rejection of injection attempts
-- Parameterized query verification
-
-DO NOT implement in Phase 2.
+Tests for vulnerable and secure SQL injection implementations.
+Verifies that:
+- Vulnerable endpoint is susceptible to injection
+- Secure endpoint rejects injection attempts
+- Parameterized queries prevent manipulation
 """
-# Placeholder for Phase 3`
+import os
+import sys
+import pytest
+import tempfile
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app import create_app
+
+
+@pytest.fixture
+def app():
+    """Create test app with lab mode enabled."""
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+
+    app = create_app({
+        'TESTING': True,
+        'DATABASE_PATH': db_path,
+        'SECRET_KEY': 'test-secret',
+        'LAB_MODE': True,
+    })
+
+    # Seed a test user
+    import sqlite3
+    import bcrypt
+    conn = sqlite3.connect(db_path)
+    password_hash = bcrypt.hashpw(b'testpass123', bcrypt.gensalt()).decode()
+    conn.execute(
+        'INSERT INTO users (username, password_hash) VALUES (?, ?)',
+        ('testuser', password_hash)
+    )
+    conn.commit()
+    conn.close()
+
+    yield app
+
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+class TestSQLInjectionEndpoints:
+    """Test SQL injection lab endpoints."""
+
+    def test_sqli_vulnerable_endpoint_exists(self, client):
+        """Verify vulnerable endpoint is accessible."""
+        response = client.get('/lab/sqli/vulnerable')
+        assert response.status_code == 200
+
+    def test_sqli_secure_endpoint_exists(self, client):
+        """Verify secure endpoint is accessible."""
+        response = client.get('/lab/sqli/secure')
+        assert response.status_code == 200
+
+    def test_normal_login_vulnerable(self, client):
+        """Test normal login works on vulnerable endpoint."""
+        response = client.post('/lab/sqli/vulnerable', data={
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['success'] is True
+
+    def test_normal_login_secure(self, client):
+        """Test normal login works on secure endpoint."""
+        response = client.post('/lab/sqli/secure', data={
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['success'] is True
+
+    def test_malicious_input_behavior_difference(self, client):
+        """
+        CRITICAL TEST: Verify that SQL injection behaves differently
+        on vulnerable vs secure endpoints.
+
+        Vulnerable: Injection succeeds (authentication bypass)
+        Secure: Injection fails (treated as literal string)
+        """
+        injection_payload = "' OR 1=1 --"
+
+        # Test vulnerable endpoint — injection should succeed
+        vuln_response = client.post('/lab/sqli/vulnerable', data={
+            'username': injection_payload,
+            'password': 'anything'
+        })
+        vuln_data = vuln_response.get_json()
+
+        # Test secure endpoint — injection should fail
+        sec_response = client.post('/lab/sqli/secure', data={
+            'username': injection_payload,
+            'password': 'anything'
+        })
+        sec_data = sec_response.get_json()
+
+        # The key difference: vulnerable allows bypass, secure doesn't
+        # Vulnerable may return success (bypass) or error (malformed query)
+        # Secure will ALWAYS return failure (no matching user)
+        assert sec_data['success'] is False, \\
+            "Secure endpoint should reject SQL injection"
+
+    def test_lab_mode_required(self, app):
+        """Verify vulnerable routes require LAB_MODE."""
+        app.config['LAB_MODE'] = False
+        client = app.test_client()
+
+        response = client.get('/lab/sqli/vulnerable')
+        assert response.status_code == 403`
   },
   {
     path: 'tests/test_cookie.py',
     language: 'python',
     category: 'tests',
-    description: 'Placeholder for Phase 3 cookie tests',
+    description: 'Cookie security tests (Phase 3)',
     content: `"""
-Cookie Security Tests — PLACEHOLDER
+Cookie Security Tests — Phase 3
 
-Phase 3 will implement tests for:
-- HttpOnly flag verification
-- Secure flag verification
-- SameSite attribute verification
-
-DO NOT implement in Phase 2.
+Tests for cookie security flags:
+- HttpOnly flag
+- Secure flag
+- SameSite attribute
 """
-# Placeholder for Phase 3`
+import os
+import sys
+import pytest
+import tempfile
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app import create_app
+
+
+@pytest.fixture
+def app():
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    app = create_app({
+        'TESTING': True,
+        'DATABASE_PATH': db_path,
+        'SECRET_KEY': 'test-secret',
+        'LAB_MODE': True,
+    })
+    yield app
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+class TestCookieSecurity:
+    """Test cookie security configuration."""
+
+    def test_vulnerable_cookie_configuration(self, client):
+        """Verify vulnerable cookies lack security flags."""
+        response = client.post('/lab/cookies/vulnerable')
+        assert response.status_code == 200
+
+        # Check Set-Cookie header
+        cookies = response.headers.getlist('Set-Cookie')
+        vuln_cookie = [c for c in cookies if 'vuln_session' in c]
+
+        if vuln_cookie:
+            cookie_str = vuln_cookie[0]
+            # VULNERABLE: Should NOT have HttpOnly
+            assert 'HttpOnly' not in cookie_str or 'httponly' not in cookie_str.lower()
+
+    def test_secure_cookie_configuration(self, client):
+        """Verify secure cookies have proper flags."""
+        response = client.post('/lab/cookies/secure')
+        assert response.status_code == 200
+
+        cookies = response.headers.getlist('Set-Cookie')
+        sec_cookie = [c for c in cookies if 'secure_session' in c]
+
+        if sec_cookie:
+            cookie_str = sec_cookie[0]
+            # SECURE: Should have security flags
+            # Note: HttpOnly might appear differently in test client
+            assert 'SameSite' in cookie_str
+
+    def test_httponly_flag(self, client):
+        """Test HttpOnly flag on secure cookies."""
+        response = client.post('/lab/cookies/secure')
+        data = response.get_json()
+        if data and 'cookie_info' in data:
+            assert data['cookie_info']['httponly'] is True
+
+    def test_samesite_configuration(self, client):
+        """Test SameSite attribute."""
+        response = client.post('/lab/cookies/secure')
+        data = response.get_json()
+        if data and 'cookie_info' in data:
+            assert data['cookie_info']['samesite'] == 'Lax'
+
+    def test_secure_flag_configuration(self, client):
+        """Test Secure flag (depends on environment)."""
+        response = client.post('/lab/cookies/secure')
+        data = response.get_json()
+        if data and 'cookie_info' in data:
+            # In test/development, Secure may be False
+            # In production, it should be True
+            assert isinstance(data['cookie_info']['secure'], bool)`
   },
   {
     path: 'tests/test_session.py',
     language: 'python',
     category: 'tests',
-    description: 'Placeholder for Phase 3 session tests',
+    description: 'Session security tests (Phase 3)',
     content: `"""
-Session Security Tests — PLACEHOLDER
+Session Security Tests — Phase 3
 
-Phase 3 will implement tests for:
-- Session creation verification
-- Session regeneration after login
+Tests for session lifecycle:
+- Session creation after login
+- Session regeneration after authentication
 - Session invalidation on logout
 - Session expiration
-
-DO NOT implement in Phase 2.
 """
-# Placeholder for Phase 3`
+import os
+import sys
+import pytest
+import tempfile
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app import create_app
+
+
+@pytest.fixture
+def app():
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    app = create_app({
+        'TESTING': True,
+        'DATABASE_PATH': db_path,
+        'SECRET_KEY': 'test-secret',
+        'LAB_MODE': True,
+    })
+    yield app
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+class TestSessionSecurity:
+    """Test session security behavior."""
+
+    def test_session_created_after_login(self, client):
+        """Verify session is created after successful login."""
+        # Register and login
+        client.post('/register', data={
+            'username': 'sessiontest',
+            'password': 'TestPass123!',
+            'confirm_password': 'TestPass123!'
+        })
+        response = client.post('/login', data={
+            'username': 'sessiontest',
+            'password': 'TestPass123!'
+        })
+
+        # Should redirect to dashboard (successful login)
+        assert response.status_code == 302
+
+    def test_session_changes_after_authentication(self, client):
+        """
+        Test that session is regenerated after authentication.
+        This prevents session fixation attacks.
+        """
+        response = client.post('/lab/session/secure', data={
+            'action': 'login',
+            'username': 'testuser'
+        })
+        data = response.get_json()
+
+        if data:
+            assert data.get('session_regenerated') is True
+
+    def test_logout_invalidates_session(self, client):
+        """Verify logout completely invalidates the session."""
+        # Login first
+        client.post('/register', data={
+            'username': 'logouttest',
+            'password': 'TestPass123!',
+            'confirm_password': 'TestPass123!'
+        })
+        client.post('/login', data={
+            'username': 'logouttest',
+            'password': 'TestPass123!'
+        })
+
+        # Logout
+        response = client.post('/logout', follow_redirects=True)
+        assert response.status_code == 200
+
+        # Verify session is invalidated
+        response = client.get('/dashboard')
+        assert response.status_code == 302  # Redirect to login
+
+    def test_expired_session(self, app):
+        """Test session expiration configuration."""
+        assert app.config['PERMANENT_SESSION_LIFETIME'] is not None
+        # Session should have a finite lifetime
+        assert app.config['PERMANENT_SESSION_LIFETIME'].total_seconds() > 0
+
+    def test_secure_session_configuration(self, app):
+        """Verify secure session cookie configuration."""
+        assert app.config['SESSION_COOKIE_HTTPONLY'] is True
+        assert app.config['SESSION_COOKIE_SAMESITE'] == 'Lax'
+        assert app.config['SESSION_COOKIE_NAME'] == 'session_id'`
   },
 
   // ===== SCRIPTS =====

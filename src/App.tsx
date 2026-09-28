@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { SecurityBanner } from './components/SecurityBanner';
-import { Phase2Sidebar } from './components/Phase2Sidebar';
-import { Phase2Overview } from './pages/Phase2Overview';
+import { Phase3Sidebar } from './components/Phase3Sidebar';
+import { Phase3Overview } from './pages/Phase3Overview';
 import { SourceCodePage } from './pages/SourceCodePage';
+import { LabSQLiPage } from './pages/LabSQLiPage';
+import { LabCookiesPage } from './pages/LabCookiesPage';
+import { LabSessionPage } from './pages/LabSessionPage';
+import { ComparisonPage } from './pages/ComparisonPage';
 import { DocumentationPage } from './pages/DocumentationPage';
-import { InteractiveDemo } from './pages/InteractiveDemo';
 import { ValidationChecklist } from './pages/ValidationChecklist';
 
-export type Page = 'overview' | 'source' | 'docs' | 'demo' | 'validation';
+export type Page = 'overview' | 'source' | 'sqli' | 'cookies' | 'session' | 'comparison' | 'docs' | 'validation';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('overview');
@@ -15,12 +18,15 @@ export default function App() {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'overview': return <Phase2Overview onNavigate={setCurrentPage} />;
+      case 'overview': return <Phase3Overview onNavigate={setCurrentPage} />;
       case 'source': return <SourceCodePage />;
+      case 'sqli': return <LabSQLiPage />;
+      case 'cookies': return <LabCookiesPage />;
+      case 'session': return <LabSessionPage />;
+      case 'comparison': return <ComparisonPage />;
       case 'docs': return <DocumentationPage />;
-      case 'demo': return <InteractiveDemo />;
       case 'validation': return <ValidationChecklist />;
-      default: return <Phase2Overview onNavigate={setCurrentPage} />;
+      default: return <Phase3Overview onNavigate={setCurrentPage} />;
     }
   };
 
@@ -28,7 +34,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
       <SecurityBanner />
       <div className="flex flex-1">
-        <Phase2Sidebar
+        <Phase3Sidebar
           currentPage={currentPage}
           onNavigate={setCurrentPage}
           isOpen={sidebarOpen}

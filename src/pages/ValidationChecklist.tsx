@@ -76,6 +76,37 @@ const checklistItems: ChecklistItem[] = [
   { id: 'no_vuln_phase2', text: 'No Phase 3 vulnerabilities implemented', category: 'Security', details: 'No SQLi, no insecure cookies, no session fixation' },
   { id: 'security_banner', text: 'Security banner displayed', category: 'Security', details: 'Warning shown on all pages about educational use only' },
   { id: 'banner_template', text: 'Security banner in base template', category: 'Security', details: 'All pages inherit the warning via base.html' },
+
+  // Phase 3 — SQL Injection Lab
+  { id: 'sqli_lab_available', text: 'LAB 01: SQL Injection available', category: 'Phase 3 Labs', details: '/labs/sqli endpoint accessible' },
+  { id: 'sqli_vulnerable_endpoint', text: 'Vulnerable SQL endpoint exists', category: 'Phase 3 Labs', details: '/lab/sqli/vulnerable uses string concatenation' },
+  { id: 'sqli_secure_endpoint', text: 'Secure SQL endpoint exists', category: 'Phase 3 Labs', details: '/lab/sqli/secure uses parameterized queries' },
+  { id: 'sqli_vulnerable_code', text: 'Vulnerable code properly commented', category: 'Phase 3 Labs', details: 'VULNERABLE, ROOT CAUSE, WHY THIS IS DANGEROUS comments' },
+  { id: 'sqli_secure_code', text: 'Secure code properly commented', category: 'Phase 3 Labs', details: 'SECURE, MITIGATION, WHY PARAMETERIZATION WORKS comments' },
+  { id: 'sqli_tests', text: 'SQL injection tests pass', category: 'Phase 3 Labs', details: 'test_sqli_vulnerable_endpoint_exists, test_malicious_input_behavior_difference, etc.' },
+
+  // Phase 3 — Cookie Security Lab
+  { id: 'cookies_lab_available', text: 'LAB 02: Cookie Security available', category: 'Phase 3 Labs', details: '/labs/cookies endpoint accessible' },
+  { id: 'cookies_vulnerable_config', text: 'Vulnerable cookie configuration exists', category: 'Phase 3 Labs', details: '/lab/cookies/vulnerable with weak flags' },
+  { id: 'cookies_secure_config', text: 'Secure cookie configuration exists', category: 'Phase 3 Labs', details: '/lab/cookies/secure with HttpOnly, Secure, SameSite' },
+  { id: 'cookies_inspection', text: 'Cookie inspection page available', category: 'Phase 3 Labs', details: 'Shows cookie attributes without exposing secrets' },
+  { id: 'cookies_tests', text: 'Cookie tests pass', category: 'Phase 3 Labs', details: 'test_httponly_flag, test_samesite_configuration, etc.' },
+
+  // Phase 3 — Session Security Lab
+  { id: 'session_lab_available', text: 'LAB 03: Session Security available', category: 'Phase 3 Labs', details: '/labs/session endpoint accessible' },
+  { id: 'session_vulnerable_demo', text: 'Vulnerable session demonstration exists', category: 'Phase 3 Labs', details: '/lab/session/vulnerable shows fixation, weak logout' },
+  { id: 'session_secure_impl', text: 'Secure session implementation exists', category: 'Phase 3 Labs', details: '/lab/session/secure with regeneration, invalidation' },
+  { id: 'session_regeneration', text: 'Session regeneration after login', category: 'Phase 3 Labs', details: 'New session ID generated after authentication' },
+  { id: 'session_invalidation', text: 'Session invalidation on logout', category: 'Phase 3 Labs', details: 'Complete session.clear() on logout' },
+  { id: 'session_tests', text: 'Session tests pass', category: 'Phase 3 Labs', details: 'test_session_created_after_login, test_logout_invalidates_session, etc.' },
+
+  // Phase 3 — Safety & Configuration
+  { id: 'lab_mode', text: 'LAB_MODE configuration works', category: 'Phase 3 Safety', details: 'Vulnerable routes only accessible when LAB_MODE=true' },
+  { id: 'lab_mode_env', text: 'LAB_MODE in .env.example', category: 'Phase 3 Safety', details: 'Documented with warning about educational use only' },
+  { id: 'phase2_preserved', text: 'Phase 2 features still work', category: 'Phase 3 Safety', details: 'Register, login, logout, dashboard all functional' },
+  { id: 'phase2_tests_pass', text: 'Phase 2 tests still pass', category: 'Phase 3 Safety', details: 'All existing tests pass with Phase 3 additions' },
+  { id: 'comparison_page', text: 'Comparison page available', category: 'Phase 3 Safety', details: '/comparison shows vulnerable vs secure differences' },
+  { id: 'self_contained', text: 'All vulnerabilities self-contained', category: 'Phase 3 Safety', details: 'No external targets, no network scanning' },
 ];
 
 export function ValidationChecklist() {

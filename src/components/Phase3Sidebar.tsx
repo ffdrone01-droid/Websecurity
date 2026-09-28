@@ -1,4 +1,4 @@
-import { Home, Code2, FileText, PlayCircle, CheckSquare, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import { Home, Code2, FileText, CheckSquare, Database, Shield, Server, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Page } from '../App';
 
 interface SidebarProps {
@@ -9,14 +9,17 @@ interface SidebarProps {
 }
 
 const navItems: { id: Page; label: string; icon: React.ReactNode; section?: string }[] = [
-  { id: 'overview', label: 'Phase 2 Overview', icon: <Home className="w-4 h-4" />, section: 'CORE APP' },
+  { id: 'overview', label: 'Phase 3 Overview', icon: <Home className="w-4 h-4" />, section: 'LABORATORIES' },
+  { id: 'sqli', label: 'LAB 01: SQL Injection', icon: <Database className="w-4 h-4" /> },
+  { id: 'cookies', label: 'LAB 02: Cookie Security', icon: <Shield className="w-4 h-4" /> },
+  { id: 'session', label: 'LAB 03: Session Security', icon: <Server className="w-4 h-4" /> },
+  { id: 'comparison', label: 'Vulnerable vs Secure', icon: <AlertTriangle className="w-4 h-4" />, section: 'ANALYSIS' },
   { id: 'source', label: 'Source Code', icon: <Code2 className="w-4 h-4" /> },
   { id: 'docs', label: 'Documentation', icon: <FileText className="w-4 h-4" />, section: 'DOCUMENTATION' },
-  { id: 'demo', label: 'Interactive Demo', icon: <PlayCircle className="w-4 h-4" />, section: 'DEMO' },
   { id: 'validation', label: 'Validation Checklist', icon: <CheckSquare className="w-4 h-4" /> },
 ];
 
-export function Phase2Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarProps) {
+export function Phase3Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarProps) {
   return (
     <aside
       className={`fixed left-0 top-0 h-full bg-gray-900 border-r border-gray-800 transition-all duration-300 z-40 flex flex-col ${
@@ -29,7 +32,7 @@ export function Phase2Sidebar({ currentPage, onNavigate, isOpen, onToggle }: Sid
         {isOpen && (
           <div className="overflow-hidden">
             <h1 className="text-sm font-bold text-emerald-400 whitespace-nowrap">Web Security Lab</h1>
-            <p className="text-[10px] text-gray-500 whitespace-nowrap">Phase 2 — Core Foundation</p>
+            <p className="text-[10px] text-gray-500 whitespace-nowrap">Phase 3 — Vulnerability Labs</p>
           </div>
         )}
       </div>
